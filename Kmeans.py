@@ -1,4 +1,4 @@
-__authors__ = 'TO_BE_FILLED'
+__authors__ = '1670849'
 __group__ = 'TO_BE_FILLED'
 
 import numpy as np
@@ -62,11 +62,7 @@ class KMeans:
         """
         Initialization of centroids
         """
-
-        #######################################################
-        ##  YOU MUST REMOVE THE REST OF THE CODE OF THIS FUNCTION
-        ##  AND CHANGE FOR YOUR OWN CODE
-        #######################################################
+        self.old_centroids = np.zeros((self.K, self.X.shape[1]))
         if self.options['km_init'].lower() == 'first':
             self.centroids = np.array([self.X[0]])
             for i in range(1, self.X.shape[0]):
@@ -74,19 +70,13 @@ class KMeans:
                     self.centroids = np.append(self.centroids, [self.X[i]], axis=0)
                     if self.centroids.shape[0] == self.K:
                         break
-            self.old_centroids = np.random.rand(self.K, self.X.shape[1])
         else:
             self.centroids = np.random.rand(self.K, self.X.shape[1])
-            self.old_centroids = np.random.rand(self.K, self.X.shape[1])
 
     def get_labels(self):
         """
         Calculates the closest centroid of all points in X and assigns each point to the closest centroid
         """
-        #######################################################
-        ##  YOU MUST REMOVE THE REST OF THE CODE OF THIS FUNCTION
-        ##  AND CHANGE FOR YOUR OWN CODE
-        #######################################################
         dists = distance(self.X, self.centroids)
         self.labels = np.argmin(dists, axis=1)
 
@@ -94,11 +84,17 @@ class KMeans:
         """
         Calculates coordinates of centroids based on the coordinates of all the points assigned to the centroid
         """
-        #######################################################
-        ##  YOU MUST REMOVE THE REST OF THE CODE OF THIS FUNCTION
-        ##  AND CHANGE FOR YOUR OWN CODE
-        #######################################################
-        pass
+        self.old_centroids = self.centroids
+        sums = np.zeros((self.K, self.X.shape[-1]), dtype=np.float64)
+        counts = np.zeros(self.K, dtype=np.long)
+
+        for i in range(self.X.shape[0]):
+            centroid = self.labels[i]
+            sums[centroid] += self.X[i].astype(np.float64)
+            counts[centroid] += 1
+
+        counts = counts.astype(np.float64).repeat(self.X.shape[-1]).reshape(sums.shape)
+        self.centroids = sums / counts
 
     def converges(self):
         """
@@ -108,18 +104,18 @@ class KMeans:
         ##  YOU MUST REMOVE THE REST OF THE CODE OF THIS FUNCTION
         ##  AND CHANGE FOR YOUR OWN CODE
         #######################################################
-        return True
+        return np.allclose(self.centroids, self.old_centroids, equal_nan=True)
 
     def fit(self):
         """
         Runs K-Means algorithm until it converges or until the number of iterations is smaller
         than the maximum number of iterations.
         """
-        #######################################################
-        ##  YOU MUST REMOVE THE REST OF THE CODE OF THIS FUNCTION
-        ##  AND CHANGE FOR YOUR OWN CODE
-        #######################################################
-        pass
+        self._init_centroids()
+        for i in range(100 if self.options["max_iter"] else self.options["max_iter"]):
+            self.get_labels()
+            self.get_centroids()
+            if self.converges(): break
 
     def withinClassDistance(self):
         """
@@ -162,11 +158,11 @@ def distance(X, C):
     P = X.shape[0]
     K = C.shape[0]
 
-    dists = np.empty((P, K))
+    dists = np.empty((P, K), dtype=np.float64)
     for i in range(P):
         for j in range(K):
-            tmp = X[i] - C[j]
-            dists[i][j] = np.sqrt(np.sum(tmp * tmp))
+            tmp = X[i].astype(np.float64) - C[j].astype(np.float64)
+            dists[i][j] = np.sqrt(np.sum(tmp * tmp, dtype=np.float64), dtype=np.float64)
 
     return dists
 

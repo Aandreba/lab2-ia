@@ -6,14 +6,10 @@ from utils import *
 
 
 class TestCases(unittest.TestCase):
-
     def setUp(self):
         np.random.seed(123)
         with open('./test/test_cases_kmeans.pkl', 'rb') as f:
             self.test_cases = pickle.load(f)
-
-
-
 
     def test_01_NIU(self):
         # DON'T FORGET TO WRITE YOUR NIU AND GROUPS
@@ -46,10 +42,6 @@ class TestCases(unittest.TestCase):
             km = KMeans(input, self.test_cases['K'][ix])
             km._init_centroids()
             km.get_labels()
-            print(
-                np.select(km.labels != self.test_cases['labels'][ix], km.labels),
-                np.select(km.labels != self.test_cases['labels'][ix], self.test_cases['labels'][ix])
-            )
             np.testing.assert_array_equal(km.labels, self.test_cases['labels'][ix])
 
     def test_06_get_centroids(self):
@@ -87,7 +79,6 @@ class TestCases(unittest.TestCase):
         for ix, centroid in enumerate(self.test_cases['kmeans']):
             color = get_colors(centroid)
             self.assertCountEqual(color, self.test_cases['color'][ix])
-
 
 if __name__ == "__main__":
     unittest.main()
