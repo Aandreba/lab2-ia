@@ -1,12 +1,10 @@
-__authors__ = '1670849'
-__group__ = 'TO_BE_FILLED'
+__authors__ = ['1670849']
+__group__ = '83'
 
 import numpy as np
 import utils
 
-
 class KMeans:
-
     def __init__(self, X, K=1, options=None):
         """
          Constructor of KMeans class
@@ -30,7 +28,7 @@ class KMeans:
                     if matrix has more than 2 dimensions, the dimensionality of the sample space is the length of
                     the last dimension
         """
-        self.X = np.reshape(X, (np.prod(X.shape[:-1]), X.shape[-1]))
+        self.X = np.reshape(X, (np.prod(X.shape[:-1]), X.shape[-1])).astype(np.float64)
 
     def _init_options(self, options=None):
         """
@@ -71,7 +69,9 @@ class KMeans:
                     if self.centroids.shape[0] == self.K:
                         break
         else:
-            self.centroids = np.random.rand(self.K, self.X.shape[1])
+            min = np.min(self.X)
+            max = np.max(self.X)
+            self.centroids = (max - min) * np.random.rand(self.K, self.X.shape[1]) + min
 
     def get_labels(self):
         """
@@ -85,27 +85,16 @@ class KMeans:
         Calculates coordinates of centroids based on the coordinates of all the points assigned to the centroid
         """
         self.old_centroids = self.centroids
-        sums = np.zeros((self.K, self.X.shape[-1]), dtype=np.float64)
-        counts = np.zeros(self.K, dtype=np.long)
-
-        for i in range(self.X.shape[0]):
-            centroid = self.labels[i]
-            sums[centroid] += self.X[i].astype(np.float64)
-            counts[centroid] += 1
-
-        counts = counts.astype(np.float64).repeat(self.X.shape[-1]).reshape(sums.shape)
-        self.centroids = sums / counts
+        self.centroids = np.empty((self.K, self.X.shape[-1]), dtype=np.float64)
+        for i in range(self.K):
+            self.centroids[i] = np.mean(self.X[self.labels == i], axis=0)
 
     def converges(self):
         """
         Checks if there is a difference between current and old centroids
         """
-        #######################################################
-        ##  YOU MUST REMOVE THE REST OF THE CODE OF THIS FUNCTION
-        ##  AND CHANGE FOR YOUR OWN CODE
-        #######################################################
         return np.allclose(self.centroids, self.old_centroids, equal_nan=True)
-
+     
     def fit(self):
         """
         Runs K-Means algorithm until it converges or until the number of iterations is smaller
@@ -115,29 +104,30 @@ class KMeans:
         for i in range(100 if self.options["max_iter"] else self.options["max_iter"]):
             self.get_labels()
             self.get_centroids()
-            if self.converges(): break
+            if self.converges(): return
 
     def withinClassDistance(self):
         """
          returns the within class distance of the current clustering
         """
-
-        #######################################################
-        ##  YOU MUST REMOVE THE REST OF THE CODE OF THIS FUNCTION
-        ##  AND CHANGE FOR YOUR OWN CODE
-        #######################################################
-        pass
+        self.fit()
+        X_centroids = self.centroids[self.labels]
+        return np.mean((self.X - X_centroids)**2)
 
     def find_bestK(self, max_K):
         """
          sets the best k analysing the results up to 'max_K' clusters
         """
-        #######################################################
-        ##  YOU MUST REMOVE THE REST OF THE CODE OF THIS FUNCTION
-        ##  AND CHANGE FOR YOUR OWN CODE
-        #######################################################
-        pass
-
+        self.K = 1
+        prev_wcd = self.withinClassDistance()        
+        for i in range(2, max_K+1):
+            self.K = i
+            wcd = self.withinClassDistance()
+            dec_pct = wcd / prev_wcd
+            if (1.0 - dec_pct) <= 0.2:
+                self.K = i - 1
+                return
+            prev_wcd = wcd
 
 def distance(X, C):
     """
@@ -150,21 +140,8 @@ def distance(X, C):
         dist: PxK numpy array position ij is the distance between the
         i-th point of the first set an the j-th point of the second set
     """
-
-    #########################################################
-    ##  YOU MUST REMOVE THE REST OF THE CODE OF THIS FUNCTION
-    ##  AND CHANGE FOR YOUR OWN CODE
-    #########################################################
-    P = X.shape[0]
-    K = C.shape[0]
-
-    dists = np.empty((P, K), dtype=np.float64)
-    for i in range(P):
-        for j in range(K):
-            tmp = X[i].astype(np.float64) - C[j].astype(np.float64)
-            dists[i][j] = np.sqrt(np.sum(tmp * tmp, dtype=np.float64), dtype=np.float64)
-
-    return dists
+    deltas = X[:, np.newaxis, :] - C[np.newaxis, :, :]
+    return np.sqrt(np.sum(deltas * deltas, axis=2))
 
 
 def get_colors(centroids):
@@ -177,8 +154,5 @@ def get_colors(centroids):
         labels: list of K labels corresponding to one of the 11 basic colors
     """
 
-    #########################################################
-    ##  YOU MUST REMOVE THE REST OF THE CODE OF THIS FUNCTION
-    ##  AND CHANGE FOR YOUR OWN CODE
-    #########################################################
-    return list(utils.colors)
+    max_probs = np.argmax(utils.get_color_prob(centroids), axis=1)
+    return list(utils.colors[max_probs])
