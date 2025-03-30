@@ -111,8 +111,7 @@ class KMeans:
          returns the within class distance of the current clustering
         """
         self.fit()
-        X_centroids = self.centroids[self.labels]
-        return np.mean((self.X - X_centroids)**2)
+        return np.mean((self.X - self.centroids[self.labels])**2)
 
     def find_bestK(self, max_K):
         """
