@@ -1,4 +1,4 @@
-__authors__ = 'TO_BE_FILLED'
+__authors__ = ['1670849']
 __group__ = 'TO_BE_FILLED'
 
 import numpy as np
@@ -21,11 +21,7 @@ class KNN:
         :param train_data: PxMxNx3 matrix corresponding to P color images
         :return: assigns the train set to the matrix self.train_data shaped as PxD (P points in a D dimensional space)
         """
-        #######################################################
-        ##  YOU MUST REMOVE THE REST OF THE CODE OF THIS FUNCTION
-        ##  AND CHANGE FOR YOUR OWN CODE
-        #######################################################
-        self.train_data = np.random.randint(8, size=[10, 4800])
+        self.train_data = train_data.astype(np.float64).reshape((train_data.shape[0], np.prod(train_data.shape[1:])))
 
     def get_k_neighbours(self, test_data, k):
         """
@@ -35,11 +31,9 @@ class KNN:
         :return: the matrix self.neighbors is created (NxK)
                  the ij-th entry is the j-th nearest train point to the i-th test point
         """
-        #######################################################
-        ##  YOU MUST REMOVE THE REST OF THE CODE OF THIS FUNCTION
-        ##  AND CHANGE FOR YOUR OWN CODE
-        #######################################################
-        self.neighbors = np.random.randint(k, size=[test_data.shape[0], k])
+        test_data = test_data.astype(np.float64).reshape((test_data.shape[0], np.prod(test_data.shape[1:])))
+        dists = np.argsort(cdist(test_data, self.train_data))
+        self.neighbors = self.labels[dists[:,:k]]
 
     def get_class(self):
         """
@@ -51,6 +45,7 @@ class KNN:
         ##  YOU MUST REMOVE THE REST OF THE CODE OF THIS FUNCTION
         ##  AND CHANGE FOR YOUR OWN CODE
         #######################################################
+        # return np.argmax()
         return np.random.randint(10, size=self.neighbors.size), np.random.random(self.neighbors.size)
 
     def predict(self, test_data, k):
