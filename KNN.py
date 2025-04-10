@@ -35,18 +35,23 @@ class KNN:
         dists = np.argsort(cdist(test_data, self.train_data))
         self.neighbors = self.labels[dists[:,:k]]
 
+    # TODO Fix
     def get_class(self):
         """
         Get the class by maximum voting
         :return: 1 array of Nx1 elements. For each of the rows in self.neighbors gets the most voted value
                 (i.e. the class at which that row belongs)
         """
-        #######################################################
-        ##  YOU MUST REMOVE THE REST OF THE CODE OF THIS FUNCTION
-        ##  AND CHANGE FOR YOUR OWN CODE
-        #######################################################
-        # return np.argmax()
-        return np.random.randint(10, size=self.neighbors.size), np.random.random(self.neighbors.size)
+        res = []
+        for classes in self.neighbors:
+            count = np.unique_counts(classes)
+            print(classes, count)
+            if np.min(count.counts) == np.max(count.counts):
+                res.append(classes[0])
+            else:
+                res.append(count.values[np.argmax(count.counts)])
+        return np.array(res)
+        # return np.random.randint(10, size=self.neighbors.size), np.random.random(self.neighbors.size)
 
     def predict(self, test_data, k):
         """
@@ -55,6 +60,5 @@ class KNN:
         :param k: the number of neighbors to look at
         :return: the output form get_class a Nx1 vector with the predicted shape for each test image
         """
-
         self.get_k_neighbours(test_data, k)
         return self.get_class()
