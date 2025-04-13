@@ -44,12 +44,11 @@ class KNN:
         """
         res = []
         for classes in self.neighbors:
-            count = np.unique_counts(classes)
-            print(classes, count)
-            if np.min(count.counts) == np.max(count.counts):
-                res.append(classes[0])
-            else:
-                res.append(count.values[np.argmax(count.counts)])
+            values, indices, counts = np.unique(classes, return_counts=True, return_index=True)
+            selector = counts == np.max(counts) 
+            values = values[selector]
+            indices = indices[selector]
+            res.append(values[np.argmin(indices)])
         return np.array(res)
         # return np.random.randint(10, size=self.neighbors.size), np.random.random(self.neighbors.size)
 
