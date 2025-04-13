@@ -1,5 +1,5 @@
 __authors__ = ['1670849']
-__group__ = 'TO_BE_FILLED'
+__group__ = '83'
 
 import numpy as np
 import math
@@ -50,7 +50,6 @@ class KNN:
             indices = indices[selector]
             res.append(values[np.argmin(indices)])
         return np.array(res)
-        # return np.random.randint(10, size=self.neighbors.size), np.random.random(self.neighbors.size)
 
     def predict(self, test_data, k):
         """
