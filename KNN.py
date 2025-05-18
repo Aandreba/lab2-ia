@@ -2,8 +2,6 @@ __authors__ = ['1670849']
 __group__ = '83'
 
 import numpy as np
-import math
-import operator
 from scipy.spatial.distance import cdist
 
 
@@ -35,7 +33,6 @@ class KNN:
         dists = np.argsort(cdist(test_data, self.train_data))
         self.neighbors = self.labels[dists[:,:k]]
 
-    # TODO Fix
     def get_class(self):
         """
         Get the class by maximum voting

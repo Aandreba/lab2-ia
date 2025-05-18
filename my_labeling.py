@@ -3,7 +3,6 @@ __group__ = 'TO_BE_FILLED'
 
 from utils_data import read_dataset, read_extended_dataset, crop_images
 
-
 if __name__ == '__main__':
 
     # Load all the images and GT
